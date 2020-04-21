@@ -4,6 +4,9 @@ import "source-map-support/register"
 import { ConvertHtmlRequest } from '../../requests/convertHtmlRequest'
 import { HtmlPdfService, HtmlPdfConvertService } from '../../businessLogic/htmlPdfService'
 
+import { GeneratePdfService, GenerateHtmlPdfService } from '../../businessLogic/generatePdfService'
+
+const generateHtmlPdfService: GeneratePdfService = new GenerateHtmlPdfService()
 const htmlPdfService: HtmlPdfService = new HtmlPdfConvertService()
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -14,10 +17,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const split = authorization.split(' ')
     const jwtToken = split[1]
 
-    const pdfBuffer = await htmlPdfService.generatePdf(newConvertReq)
+    const pdfBuffer = await generateHtmlPdfService.generatePdf(newConvertReq)
 
     const newItem = await htmlPdfService.saveHtmlPdf(newConvertReq, pdfBuffer, jwtToken)
-
 
     return {
         statusCode: 201,
