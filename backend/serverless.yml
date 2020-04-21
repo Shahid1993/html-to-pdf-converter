@@ -82,6 +82,25 @@ functions:
           - dynamodb:query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
 
+  DeleteTodo:
+    handler: src/lambda/http/deleteHtmlPdf.handler
+    events:
+      - http:
+          method: delete
+          path: htmlpdf/{htmlPdfId}
+          cors: true
+          authorizer: Auth
+          documentation:
+            summary: Delete existing HtmlPdf item function
+            description: Delete existing HtmlPdf item function
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-delete-htmlpdf-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
+
+
 
 resources:
   Resources:

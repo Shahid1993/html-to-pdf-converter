@@ -13,6 +13,7 @@ export interface HtmlPdfService {
     generatePdf(newConvertRequest: ConvertHtmlRequest): Promise<Buffer>
     saveHtmlPdf(newConvertRequest: ConvertHtmlRequest, pdfBuffer: Buffer, jwtToken: string): Promise<HtmlPdfItem>
     getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]>
+    deleteHtmlPdf(htmlPdfId: string, jwtToken: string)
 }
 
 
@@ -86,5 +87,11 @@ export class HtmlPdfConvertService implements HtmlPdfService {
         const userId = parseUserId(jwtToken)
 
         return await htmlPdfAccess.getAllHtmlPdfs(userId)
+    }
+
+    async deleteHtmlPdf(htmlPdfId: string, jwtToken: string) {
+        const userId = parseUserId(jwtToken)
+    
+        await htmlPdfAccess.deleteHtmlPdf(htmlPdfId, userId)
     }
 }

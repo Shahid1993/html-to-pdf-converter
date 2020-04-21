@@ -2,6 +2,7 @@ export interface HtmlPdfAccess {
     savePdfBuffer(pdfBuffer: Buffer, htmlPdfId: string): Promise<string>
     saveHtmlPdf(htmlPdf: HtmlPdfItem): Promise<HtmlPdfItem>
     getAllHtmlPdfs(userId: string): Promise<HtmlPdfItem[]>
+    deleteHtmlPdf(htmlPdfId: string, userId: string)
 }
 
 import * as AWS  from 'aws-sdk'
@@ -65,13 +66,30 @@ export class HtmlPdfDataAccess implements HtmlPdfAccess{
             },
             ExpressionAttributeValues: {
                 ":userId": userId
-            }
+            },
+            ScanIndexForward: false,
         }
 
         const result = await this.docClient.query(params).promise()
 
         const todos = result.Items
         return todos as HtmlPdfItem[]
+    }
+
+    async deleteHtmlPdf(htmlPdfId: string, userId: string) {
+        console.log(`Deleting existing htmlPdf item with id ${htmlPdfId}`)
+
+        const params = {
+            TableName: this.htmlPdfTable,
+            Key: {
+                "userId": userId,
+                "htmlPdfId": htmlPdfId
+            },
+        };
+
+        await this.docClient.delete(params).promise();
+
+        return
     }
 } 
 
