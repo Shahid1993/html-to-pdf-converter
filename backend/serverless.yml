@@ -42,7 +42,7 @@ functions:
     events:
       - http:
           method: post
-          path: urls
+          path: htmlpdf
           cors: true
           authorizer: Auth
           request:
@@ -63,6 +63,21 @@ functions:
           - s3:PutObject
           - s3:GetObject
         Resource: arn:aws:s3:::${self:provider.environment.HTML_PDF_S3_BUCKET}/* 
+
+  GetTodos:
+    handler: src/lambda/http/getHtmlPdfs.handler
+    events:
+      - http:
+          method: get
+          path: htmlpdf
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-htmlpdf-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
 
 
 resources:

@@ -1,6 +1,7 @@
 export interface HtmlPdfAccess {
     savePdfBuffer(pdfBuffer: Buffer, htmlPdfId: string): Promise<string>
     saveHtmlPdf(htmlPdf: HtmlPdfItem): Promise<HtmlPdfItem>
+    getAllHtmlPdfs(userId: string): Promise<HtmlPdfItem[]>
 }
 
 import * as AWS  from 'aws-sdk'
@@ -51,6 +52,26 @@ export class HtmlPdfDataAccess implements HtmlPdfAccess{
         await this.docClient.put(params).promise()
 
         return htmPdf as HtmlPdfItem
+    }
+
+    async getAllHtmlPdfs(userId: string): Promise<HtmlPdfItem[]> {
+        console.log('Getting all htmlPdfs')
+
+        const params = {
+            TableName: this.htmlPdfTable,
+            KeyConditionExpression: "#userId = :userId",
+            ExpressionAttributeNames: {
+                "#userId": "userId"
+            },
+            ExpressionAttributeValues: {
+                ":userId": userId
+            }
+        }
+
+        const result = await this.docClient.query(params).promise()
+
+        const todos = result.Items
+        return todos as HtmlPdfItem[]
     }
 } 
 

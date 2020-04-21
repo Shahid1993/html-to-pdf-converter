@@ -11,7 +11,8 @@ const htmlPdfAccess: HtmlPdfAccess = new HtmlPdfDataAccess()
 
 export interface HtmlPdfService {
     generatePdf(newConvertRequest: ConvertHtmlRequest): Promise<Buffer>
-    saveHtmlPdf(newConvertRequest: ConvertHtmlRequest, pdfBuffer: Buffer, jwtToken: string)
+    saveHtmlPdf(newConvertRequest: ConvertHtmlRequest, pdfBuffer: Buffer, jwtToken: string): Promise<HtmlPdfItem>
+    getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]>
 }
 
 
@@ -78,5 +79,12 @@ export class HtmlPdfConvertService implements HtmlPdfService {
             pdfUrl,
             timeStamp: new Date().toISOString()
         })
+    }
+
+    async getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]> {
+
+        const userId = parseUserId(jwtToken)
+
+        return await htmlPdfAccess.getAllHtmlPdfs(userId)
     }
 }
