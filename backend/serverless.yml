@@ -1,5 +1,5 @@
 service:
-  name: backend
+  name: html-to-pdf-converter
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -28,21 +28,27 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     PROJECT_NAME: html-to-pdf-converter
     HTML_PDF_TABLE: HtmlPdf-${self:provider.stage}
+    HTML_PDF_S3_BUCKET: html-to-pdf-shahid-${self:provider.stage}
 
 functions:
+
+  Auth:
+    handler: src/lambda/auth/auth0Authorizer.handler
   
   CreatePdf:
     handler: src/lambda/http/createPdf.handler
+    memorySize: 1024 # optional, in MB, default is 1024
+    timeout: 30 # optional, in seconds, default is 6
     events:
       - http:
           method: post
           path: urls
           cors: true
-          # authorizer: Auth
-          # request:
-          #   # Schema that will be used to validate incoming create requests
-          #   schema:
-          #     application/json: ${file(models/create-todo-request.json)}
+          authorizer: Auth
+          request:
+            # Schema that will be used to validate incoming create requests
+            schema:
+              application/json: ${file(models/create-html-pdf-convert-request.json)}
           documentation:
             summary: Create a new pdf from requested URL
             description: Create a new pdf from requested URL
@@ -52,6 +58,11 @@ functions:
         Action:
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.HTML_PDF_S3_BUCKET}/* 
 
 
 resources:
@@ -75,12 +86,45 @@ resources:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: urlId
+          - AttributeName: htmlPdfId
             AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
-          - AttributeName: urlId
+          - AttributeName: htmlPdfId
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.HTML_PDF_TABLE}
+
+    HtmlPdfBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.HTML_PDF_S3_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - 
+              AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+
+    BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Id: MyPolicy
+          Version: "2012-10-17"
+          Statement:
+            - Sid: PublicReadForGetBucketObjects
+              Effect: Allow
+              Principal: '*'
+              Action: 's3:GetObject'
+              Resource: 'arn:aws:s3:::${self:provider.environment.HTML_PDF_S3_BUCKET}/*'
+        Bucket: !Ref HtmlPdfBucket

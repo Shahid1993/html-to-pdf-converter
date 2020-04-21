@@ -1,18 +1,31 @@
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda"
 import "source-map-support/register"
 
+import { ConvertHtmlRequest } from '../../requests/convertHtmlRequest'
+import { HtmlPdfService, HtmlPdfConvertService } from '../../businessLogic/htmlPdfService'
+
+const htmlPdfService: HtmlPdfService = new HtmlPdfConvertService()
+
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     console.log('Processing event: ', event)
 
-    //TODO
+    const newConvertReq: ConvertHtmlRequest = JSON.parse(event.body)
+    const authorization = event.headers.Authorization
+    const split = authorization.split(' ')
+    const jwtToken = split[1]
+
+    const pdfBuffer = await htmlPdfService.generatePdf(newConvertReq)
+
+    const newItem = await htmlPdfService.saveHtmlPdf(newConvertReq, pdfBuffer, jwtToken)
+
 
     return {
         statusCode: 201,
         headers: {
             'Access-Control-Allow-Origin': '*'
         },
-        body: JSON.stringify(
-            {'newItem': 'Created successfully'}
-        )
+        body: JSON.stringify({
+            item: newItem
+          })
     }
 }

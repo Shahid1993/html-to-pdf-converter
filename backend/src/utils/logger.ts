@@ -1,5 +1,5 @@
-import * as winston from 'winston'
-
+//import * as winston from 'winston'
+const winston = require('winston')
 /**
  * Create a logger instance to write log messages in JSON format.
  *
