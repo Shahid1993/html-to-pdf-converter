@@ -12,19 +12,75 @@ custom:
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
+  - serverless-aws-documentation
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
   runtime: nodejs12.x
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    PROJECT_NAME: html-to-pdf-converter
+    HTML_PDF_TABLE: HtmlPdf-${self:provider.stage}
 
 functions:
-  hello:
-    handler: handler.hello
+  
+  CreatePdf:
+    handler: src/lambda/http/createPdf.handler
     events:
       - http:
-          method: get
-          path: hello
+          method: post
+          path: urls
+          cors: true
+          # authorizer: Auth
+          # request:
+          #   # Schema that will be used to validate incoming create requests
+          #   schema:
+          #     application/json: ${file(models/create-todo-request.json)}
+          documentation:
+            summary: Create a new pdf from requested URL
+            description: Create a new pdf from requested URL
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-htmlpdf-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
+
+
+resources:
+  Resources:
+    # TODO: Add any necessary AWS resources
+
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    HtmlPdfDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: urlId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: urlId
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.HTML_PDF_TABLE}
