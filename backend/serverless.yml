@@ -15,6 +15,9 @@ plugins:
   - serverless-aws-documentation
   - serverless-iam-roles-per-function
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs12.x
