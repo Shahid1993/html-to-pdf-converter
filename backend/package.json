@@ -15,8 +15,10 @@
     "jsonwebtoken": "^8.5.1",
     "jwk-to-pem": "^2.0.3",
     "middy": "^0.36.0",
+    "pdf-lib": "^1.4.1",
     "puppeteer-core": "^2.1.0",
     "source-map-support": "^0.5.10",
+    "typedarray-to-buffer": "^3.1.5",
     "uuid": "^7.0.3",
     "winston": "^3.2.1"
   },

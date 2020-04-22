@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "title": "htmlPdfUpdateRequest",
+    "type": "object",
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "author": {
+            "type": "string"
+        },
+        "subject": {
+            "type": "string"
+        },
+        "producer": {
+            "type": "string"
+        },
+        "creator": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": false
+}

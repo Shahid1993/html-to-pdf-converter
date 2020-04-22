@@ -100,6 +100,32 @@ functions:
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
 
+  UpdateHtmlPdf:
+    handler: src/lambda/http/updateHtmlPdfMetadata.handler
+    events:
+      - http:
+          method: patch
+          path: htmlpdf/{htmlPdfId}          
+          cors: true
+          authorizer: Auth
+          request:
+            # Schema that will be used to validate incoming create requests
+            schema:
+              application/json: ${file(models/update-html-pdf-request.json)}
+          documentation:
+            summary: Update metadata of the generated pdf
+            description: Update metadata of the generated pdf
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-update-htmlpdf-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE} 
+      - Effect: Allow
+        Action:
+          - s3:PutObject
+          - s3:GetObject
+        Resource: arn:aws:s3:::${self:provider.environment.HTML_PDF_S3_BUCKET}/* 
 
 
 resources:

@@ -3,4 +3,4 @@
  */
 export interface ConvertHtmlRequest {
     url: string
-  }
+}

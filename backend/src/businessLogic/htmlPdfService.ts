@@ -1,6 +1,7 @@
 import * as uuid from 'uuid'
 
 import { ConvertHtmlRequest } from '../requests/convertHtmlRequest'
+import { UpdateHtmlPdfRequest } from '../requests/updateHtmlPdfRequest'
 import { HtmlPdfItem } from '../models/HtmlPdfItem'
 import { parseUserId } from '../auth/utils'
 import { HtmlPdfAccess, HtmlPdfDataAccess } from '../dataLayer/htmlPdfAccess'
@@ -11,6 +12,7 @@ export interface HtmlPdfService {
     saveHtmlPdf(newConvertRequest: ConvertHtmlRequest, pdfBuffer: Buffer, jwtToken: string): Promise<HtmlPdfItem>
     getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]>
     deleteHtmlPdf(htmlPdfId: string, jwtToken: string)
+    updateHtmlPdf(updateHtmlPdf: UpdateHtmlPdfRequest, htmlPdfId: string, jwtToken: string)
 }
 
 
@@ -34,16 +36,25 @@ export class HtmlPdfConvertService implements HtmlPdfService {
         })
     }
 
-    async getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]> {
+    public async getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]> {
 
         const userId = parseUserId(jwtToken)
 
         return await htmlPdfAccess.getAllHtmlPdfs(userId)
     }
 
-    async deleteHtmlPdf(htmlPdfId: string, jwtToken: string) {
+    public async deleteHtmlPdf(htmlPdfId: string, jwtToken: string) {
         const userId = parseUserId(jwtToken)
     
         await htmlPdfAccess.deleteHtmlPdf(htmlPdfId, userId)
+    }
+
+    public async updateHtmlPdf(updateHtmlPdf: UpdateHtmlPdfRequest, htmlPdfId: string, jwtToken: string) {
+        const userId = parseUserId(jwtToken)
+    
+        return await htmlPdfAccess.updateHtmlPdf({
+            ...updateHtmlPdf,
+            modificationDate: new Date()
+        }, htmlPdfId, userId)
     }
 }
