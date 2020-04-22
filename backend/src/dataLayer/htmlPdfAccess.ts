@@ -4,6 +4,7 @@ export interface HtmlPdfAccess {
     getAllHtmlPdfs(userId: string): Promise<HtmlPdfItem[]>
     deleteHtmlPdf(htmlPdfId: string, userId: string)
     updateHtmlPdf(updatedHtmlPdf: HtmlPdfUpdate, htmlPdfId: string, userId: string): Promise<HtmlPdfUpdate>
+    getHtmlPdfById(userId: string, htmlPdfId: string): Promise<HtmlPdfItem>
 }
 
 import * as AWS  from 'aws-sdk'
@@ -76,8 +77,8 @@ export class HtmlPdfDataAccess implements HtmlPdfAccess{
 
         const result = await this.docClient.query(params).promise()
 
-        const todos = result.Items
-        return todos as HtmlPdfItem[]
+        const htmlpdfs = result.Items
+        return htmlpdfs as HtmlPdfItem[]
     }
 
     async deleteHtmlPdf(htmlPdfId: string, userId: string) {
@@ -170,7 +171,34 @@ export class HtmlPdfDataAccess implements HtmlPdfAccess{
                 Body: pdfBuffer
             })
             .promise()
+    }
 
+    async getHtmlPdfById(userId: string, htmlPdfId: string): Promise<HtmlPdfItem> {
+        console.log(`Getting HtmlPdf by Id: ${htmlPdfId}`)
+
+        const params = {
+            TableName: this.htmlPdfTable,
+            KeyConditionExpression: "#userId = :userId AND #htmlPdfId = :htmlPdfId",
+            ExpressionAttributeNames: {
+                "#userId": "userId",
+                "#htmlPdfId": "htmlPdfId"
+            },
+            ExpressionAttributeValues: {
+                ":userId": userId,
+                ":htmlPdfId": htmlPdfId
+            }
+        } 
+
+        const result = await this.docClient.query(params).promise()
+
+        
+
+        if (result.Count !== 0){
+            const htmlpdf = result.Items[0]
+            return htmlpdf as HtmlPdfItem
+        }
+
+        return null
     }
 
 } 

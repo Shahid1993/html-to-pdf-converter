@@ -62,7 +62,7 @@ functions:
           documentation:
             summary: Create a new pdf from requested URL
             description: Create a new pdf from requested URL
-    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-htmlpdf-role-${self:provider.stage}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-html-pdf-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -82,7 +82,7 @@ functions:
       type: Linear10PercentEvery1Minute
       alias: Live
 
-  GetTodos:
+  GetHtmlPdfs:
     handler: src/lambda/http/getHtmlPdfs.handler
     events:
       - http:
@@ -90,7 +90,7 @@ functions:
           path: htmlpdf
           cors: true
           authorizer: Auth
-    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-htmlpdf-role-${self:provider.stage}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-html-pdf-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -105,7 +105,30 @@ functions:
       type: Linear10PercentEvery1Minute
       alias: Live
 
-  DeleteTodo:
+  GetHtmlPdfById:
+    handler: src/lambda/http/getHtmlPdf.handler
+    events:
+      - http:
+          method: get
+          path: htmlpdf/{htmlPdfId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-html-pdf-by-id-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
+      - Effect: Allow
+        Action:
+          - codedeploy:*
+        Resource:
+          - '*'    
+    deploymentSettings:
+      type: Linear10PercentEvery1Minute
+      alias: Live
+
+  DeleteHtmlPdf:
     handler: src/lambda/http/deleteHtmlPdf.handler
     events:
       - http:
@@ -116,7 +139,7 @@ functions:
           documentation:
             summary: Delete existing HtmlPdf item function
             description: Delete existing HtmlPdf item function
-    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-delete-htmlpdf-role-${self:provider.stage}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-delete-html-pdf-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -146,7 +169,7 @@ functions:
           documentation:
             summary: Update metadata of the generated pdf
             description: Update metadata of the generated pdf
-    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-update-htmlpdf-role-${self:provider.stage}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-update-html-pdf-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
         Action:

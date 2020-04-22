@@ -13,6 +13,7 @@ export interface HtmlPdfService {
     getAllHtmlPdfs(jwtToken: string): Promise<HtmlPdfItem[]>
     deleteHtmlPdf(htmlPdfId: string, jwtToken: string)
     updateHtmlPdf(updateHtmlPdf: UpdateHtmlPdfRequest, htmlPdfId: string, jwtToken: string)
+    getHtmlPdfById(htmlPdfId: string, jwtToken: string): Promise<HtmlPdfItem>
 }
 
 
@@ -56,5 +57,11 @@ export class HtmlPdfConvertService implements HtmlPdfService {
             ...updateHtmlPdf,
             modificationDate: new Date()
         }, htmlPdfId, userId)
+    }
+
+    public async getHtmlPdfById(htmlPdfId: string, jwtToken: string): Promise<HtmlPdfItem> {
+        const userId = parseUserId(jwtToken)
+
+        return await htmlPdfAccess.getHtmlPdfById(userId, htmlPdfId)
     }
 }
