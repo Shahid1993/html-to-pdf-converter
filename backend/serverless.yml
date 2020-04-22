@@ -15,8 +15,9 @@ plugins:
   - serverless-aws-documentation
   - serverless-iam-roles-per-function
   - serverless-plugin-tracing
+  - serverless-plugin-canary-deployments
 
-  
+
 package:
   individually: true
 
@@ -72,6 +73,14 @@ functions:
           - s3:PutObject
           - s3:GetObject
         Resource: arn:aws:s3:::${self:provider.environment.HTML_PDF_S3_BUCKET}/* 
+      - Effect: Allow
+        Action:
+          - codedeploy:*
+        Resource:
+          - '*'    
+    deploymentSettings:
+      type: Linear10PercentEvery1Minute
+      alias: Live
 
   GetTodos:
     handler: src/lambda/http/getHtmlPdfs.handler
@@ -87,6 +96,14 @@ functions:
         Action:
           - dynamodb:query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
+      - Effect: Allow
+        Action:
+          - codedeploy:*
+        Resource:
+          - '*'    
+    deploymentSettings:
+      type: Linear10PercentEvery1Minute
+      alias: Live
 
   DeleteTodo:
     handler: src/lambda/http/deleteHtmlPdf.handler
@@ -105,6 +122,14 @@ functions:
         Action:
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.HTML_PDF_TABLE}
+      - Effect: Allow
+        Action:
+          - codedeploy:*
+        Resource:
+          - '*'    
+    deploymentSettings:
+      type: Linear10PercentEvery1Minute
+      alias: Live
 
   UpdateHtmlPdf:
     handler: src/lambda/http/updateHtmlPdfMetadata.handler
@@ -132,6 +157,14 @@ functions:
           - s3:PutObject
           - s3:GetObject
         Resource: arn:aws:s3:::${self:provider.environment.HTML_PDF_S3_BUCKET}/* 
+      - Effect: Allow
+        Action:
+          - codedeploy:*
+        Resource:
+          - '*'    
+    deploymentSettings:
+      type: Linear10PercentEvery1Minute
+      alias: Live
 
 
 resources:
