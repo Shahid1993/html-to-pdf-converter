@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { Form, Button } from 'semantic-ui-react'
+import { Form, Button, Grid, Loader } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
 import { getHtmlPdf, patchHtmlPdf } from '../api/htmlPdfs-api'
 
 enum UpdateState {
   NoUpdate,
-  Updating,
+  Update,
 }
 
 interface EditHtmlPdfProps {
@@ -25,6 +25,7 @@ interface EditHtmlPdfState {
   producer?: string
   creator?: string
   updateState: UpdateState
+  loadingMetadata: boolean
 }
 
 export class EditHtmlPdf extends React.PureComponent<
@@ -37,7 +38,8 @@ export class EditHtmlPdf extends React.PureComponent<
     subject: '',
     producer: '',
     creator: '',
-    updateState: UpdateState.NoUpdate
+    updateState: UpdateState.Update,
+    loadingMetadata: true
   }
 
   handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,18 +66,7 @@ export class EditHtmlPdf extends React.PureComponent<
     event.preventDefault()
 
     try {
-      // if (!this.state.file) {
-      //   alert('File should be selected')
-      //   return
-      // }
-
-      // this.setUploadState(UploadState.FetchingPresignedUrl)
-      // const uploadUrl = await getUploadUrl(this.props.auth.getIdToken(), this.props.match.params.todoId)
-
-      // this.setUploadState(UploadState.UploadingFile)
-      // await uploadFile(uploadUrl, this.state.file)
-
-      this.setUpdateState(UpdateState.Updating)
+      this.setUpdateState(UpdateState.NoUpdate)
       await patchHtmlPdf(this.props.auth.getIdToken(), this.props.match.params.htmlPdfId,{
         title: this.state.title,
         author: this.state.author,
@@ -88,7 +79,7 @@ export class EditHtmlPdf extends React.PureComponent<
     } catch (e) {
       alert('Could not update metadata: ' + e.message)
     } finally {
-      //this.setUploadState(UploadState.NoUpload)
+      this.setUpdateState(UpdateState.Update)
     }
   }
 
@@ -102,12 +93,12 @@ export class EditHtmlPdf extends React.PureComponent<
     try {
       const  htmlPdf = await getHtmlPdf(this.props.auth.getIdToken(), this.props.match.params.htmlPdfId)
       this.setState({
-        title: htmlPdf.title,
-        author: htmlPdf.author,
-        subject: htmlPdf.subject,
-        producer: htmlPdf.producer,
-        creator: htmlPdf.creator
-
+        title: htmlPdf.title || '',
+        author: htmlPdf.author || '',
+        subject: htmlPdf.subject || '',
+        producer: htmlPdf.producer || '',
+        creator: htmlPdf.creator || '',
+        loadingMetadata: false
       })
     } catch (e) {
       alert(`Failed to fetch metadata for pdf : ${e.message}`)
@@ -115,6 +106,10 @@ export class EditHtmlPdf extends React.PureComponent<
   }
 
   render() {
+    if (this.state.loadingMetadata){
+      return this.renderLoading()
+    }
+
     return (
       <div>
         <h1>Update pdf metadata</h1>
@@ -171,12 +166,21 @@ export class EditHtmlPdf extends React.PureComponent<
     return (
       <div>
         <Button
-          loading={this.state.updateState !== UpdateState.Updating}
+          loading={this.state.updateState == UpdateState.NoUpdate}
           type="submit"
-        >
-          Upload
+        >Update
         </Button>
       </div>
+    )
+  }
+
+  renderLoading() {
+    return (
+      <Grid.Row>
+        <Loader indeterminate active inline="centered">
+          Loading Metadata
+        </Loader>
+      </Grid.Row>
     )
   }
 }

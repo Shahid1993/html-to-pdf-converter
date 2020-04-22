@@ -2,6 +2,7 @@ import dateFormat from 'dateformat'
 import { History } from 'history'
 import update from 'immutability-helper'
 import * as React from 'react'
+import * as validUrl from 'valid-url'
 import {
   Button,
   Checkbox,
@@ -46,7 +47,10 @@ export class HtmlsPdfs extends React.PureComponent<HtmlPdfsProps, HtmlPdfsState>
 
   onHtmlPdfCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
-      //const dueDate = this.calculateDueDate()
+      if (!validUrl.isUri(this.state.newHtmlPdfUrl)){
+        alert('Not a valid url')
+        return
+      }
       const newHtmlPdf = await createHtmlPdf(this.props.auth.getIdToken(), {
         url: this.state.newHtmlPdfUrl
       })
@@ -69,24 +73,6 @@ export class HtmlsPdfs extends React.PureComponent<HtmlPdfsProps, HtmlPdfsState>
       alert('HtmlPdf deletion failed')
     }
   }
-
-  // onHtmlPdfUpdate = async (pos: number) => {
-  //   try {
-  //     const htmlPdf = this.state.todos[pos]
-  //     await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
-  //       name: todo.name,
-  //       dueDate: todo.dueDate,
-  //       done: !todo.done
-  //     })
-  //     this.setState({
-  //       todos: update(this.state.todos, {
-  //         [pos]: { done: { $set: !todo.done } }
-  //       })
-  //     })
-  //   } catch {
-  //     alert('Todo deletion failed')
-  //   }
-  // }
 
   async componentDidMount() {
     try {
@@ -121,7 +107,7 @@ export class HtmlsPdfs extends React.PureComponent<HtmlPdfsProps, HtmlPdfsState>
               color: 'teal',
               labelPosition: 'left',
               icon: 'add',
-              content: 'New Url',
+              content: 'Generate PDF',
               onClick: this.onHtmlPdfCreate
             }}
             fluid
