@@ -14,7 +14,9 @@ plugins:
   - serverless-webpack
   - serverless-aws-documentation
   - serverless-iam-roles-per-function
+  - serverless-plugin-tracing
 
+  
 package:
   individually: true
 
@@ -23,6 +25,10 @@ provider:
   runtime: nodejs12.x
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+
+  tracing:
+    lambda: true
+    apiGateway: true
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
