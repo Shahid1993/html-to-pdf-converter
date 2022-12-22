@@ -12,7 +12,7 @@
     "axios": "^0.19.2",
     "chrome-aws-lambda": "^2.1.1",
     "http-errors": "^1.7.3",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "jwk-to-pem": "^2.0.3",
     "middy": "^0.36.0",
     "pdf-lib": "^1.4.1",
